@@ -1,0 +1,11 @@
+# Local-dev toolchain pin.
+#
+# `s3s`/`s3s-fs` 0.13 declare `rust-version = "1.92.0"`, so a plain
+# `cargo check` must run under rustc ≥ 1.92. The fleet Nix build does not
+# read this file — it builds with the fenix `stable` toolchain selected by
+# substrate's rust overlay (currently rustc 1.96.0, well past the floor) —
+# so this pin exists only to give rustup-equipped local dev a compatible
+# toolchain. Keep at the s3s MSRV floor; bump only if a dep raises it.
+[toolchain]
+channel = "1.92.0"
+components = ["rustc", "cargo", "rust-src", "clippy", "rustfmt"]

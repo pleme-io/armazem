@@ -1,0 +1,49 @@
+[package]
+name = "armazem"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["Pleme Team <team@pleme.io>"]
+repository = "https://github.com/pleme-io/armazem"
+homepage = "https://github.com/pleme-io/armazem"
+readme = "README.md"
+description = "armázem — the any-storage→S3 gateway (M0: filesystem backend over the s3s crate)"
+keywords = ["s3", "storage", "gateway", "object-storage", "axum"]
+categories = ["web-programming::http-server", "network-programming"]
+exclude = ["target/", "result-*", "Cargo.nix", "flake.*"]
+
+[[bin]]
+name = "armazem"
+path = "src/main.rs"
+
+[dependencies]
+# S3 gateway core. The s3s crate implements the S3 wire protocol over a typed
+# `S3` trait; s3s-fs is the official filesystem-backed `S3` impl (the M0
+# backend). hyper-util drives the connection serving loop (see gateway.rs).
+s3s = "0.13"
+s3s-fs = "0.13"
+
+# Connection serving for the s3s tower service. Versions match s3s 0.13's
+# own hyper/hyper-util pins so the protocol types line up.
+hyper = { version = "1", features = ["http1", "http2", "server"] }
+hyper-util = { version = "0.1", features = ["server-auto", "server-graceful", "http1", "http2", "tokio"] }
+
+# Health / metrics sidecar server.
+axum = "0.7"
+
+# Async runtime.
+tokio = { version = "1.41", features = ["full"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+
+# Structured logging.
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling (application glue).
+anyhow = "1.0"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true

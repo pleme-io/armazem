@@ -1,0 +1,6 @@
+# ★★ TYPED EMISSION (org directive): std::format is banned fleet-wide. Emitted
+# strings come from a typed surface (write!/Display/typed builders) or a typed
+# logging/error macro (tracing::*, anyhow::anyhow!). Application glue that the
+# s3s/axum/hyper internals force is the documented exception.
+disallowed-methods = []
+disallowed-macros = ["std::format"]
