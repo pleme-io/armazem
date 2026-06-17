@@ -93,6 +93,21 @@ rec {
     #   inject test dependencies into the build
 
     crates = {
+      "adler2" = rec {
+        crateName = "adler2";
+        version = "2.0.1";
+        edition = "2021";
+        sha256 = "1ymy18s9hs7ya1pjc9864l30wk8p2qfqdi7mhhcc5nfakxbij09j";
+        authors = [
+          "Jonas Schievink <jonasschievink@gmail.com>"
+          "oyvindln <oyvindln@users.noreply.github.com>"
+        ];
+        features = {
+          "core" = [ "dep:core" ];
+          "default" = [ "std" ];
+          "rustc-dep-of-std" = [ "core" ];
+        };
+      };
       "aho-corasick" = rec {
         crateName = "aho-corasick";
         version = "1.1.4";
@@ -176,6 +191,11 @@ rec {
             path = "src/main.rs";
             requiredFeatures = [ ];
           }
+          {
+            name = "armazem-publish";
+            path = "src/bin/armazem-publish.rs";
+            requiredFeatures = [ ];
+          }
         ];
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };
         authors = [
@@ -189,6 +209,10 @@ rec {
           {
             name = "axum";
             packageId = "axum";
+          }
+          {
+            name = "flate2";
+            packageId = "flate2";
           }
           {
             name = "hyper";
@@ -209,6 +233,10 @@ rec {
             packageId = "s3s-fs";
           }
           {
+            name = "tar";
+            packageId = "tar";
+          }
+          {
             name = "tokio";
             packageId = "tokio";
             features = [ "full" ];
@@ -226,6 +254,11 @@ rec {
             name = "tracing-subscriber";
             packageId = "tracing-subscriber";
             features = [ "env-filter" ];
+          }
+          {
+            name = "ureq";
+            packageId = "ureq";
+            usesDefaultFeatures = false;
           }
         ];
 
@@ -568,6 +601,20 @@ rec {
         };
         resolvedDefaultFeatures = [ "tracing" ];
       };
+      "base64" = rec {
+        crateName = "base64";
+        version = "0.22.1";
+        edition = "2018";
+        sha256 = "1imqzgh7bxcikp5vx3shqvw9j09g9ly0xr0jma0q66i52r7jbcvj";
+        authors = [
+          "Marshall Pierce <marshall@mpierce.org>"
+        ];
+        features = {
+          "default" = [ "std" ];
+          "std" = [ "alloc" ];
+        };
+        resolvedDefaultFeatures = [ "alloc" "default" "std" ];
+      };
       "base64-simd" = rec {
         crateName = "base64-simd";
         version = "0.8.0";
@@ -607,6 +654,7 @@ rec {
           "serde" = [ "serde_core" ];
           "serde_core" = [ "dep:serde_core" ];
         };
+        resolvedDefaultFeatures = [ "std" ];
       };
       "block-buffer" = rec {
         crateName = "block-buffer";
@@ -911,6 +959,26 @@ rec {
         ];
 
       };
+      "crc32fast" = rec {
+        crateName = "crc32fast";
+        version = "1.5.0";
+        edition = "2021";
+        sha256 = "04d51liy8rbssra92p0qnwjw8i9rm9c4m3bwy19wjamz1k4w30cl";
+        authors = [
+          "Sam Rijs <srijs@airpost.net>"
+          "Alex Crichton <alex@alexcrichton.com>"
+        ];
+        dependencies = [
+          {
+            name = "cfg-if";
+            packageId = "cfg-if";
+          }
+        ];
+        features = {
+          "default" = [ "std" ];
+        };
+        resolvedDefaultFeatures = [ "default" "std" ];
+      };
       "crypto-common 0.1.7" = rec {
         crateName = "crypto-common";
         version = "0.1.7";
@@ -1143,6 +1211,27 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "std" ];
       };
+      "filetime" = rec {
+        crateName = "filetime";
+        version = "0.2.29";
+        edition = "2018";
+        sha256 = "0napyyfccb26r7fyh9hg7ixrh4vph9h7y7k4iv1j19phqwrpla2w";
+        authors = [
+          "Alex Crichton <alex@alexcrichton.com>"
+        ];
+        dependencies = [
+          {
+            name = "cfg-if";
+            packageId = "cfg-if";
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+            target = { target, features }: (target."unix" or false);
+          }
+        ];
+
+      };
       "find-msvc-tools" = rec {
         crateName = "find-msvc-tools";
         version = "0.1.9";
@@ -1150,6 +1239,56 @@ rec {
         sha256 = "10nmi0qdskq6l7zwxw5g56xny7hb624iki1c39d907qmfh3vrbjv";
         libName = "find_msvc_tools";
 
+      };
+      "flate2" = rec {
+        crateName = "flate2";
+        version = "1.1.9";
+        edition = "2018";
+        sha256 = "0g2pb7cxnzcbzrj8bw4v6gpqqp21aycmf6d84rzb6j748qkvlgw4";
+        authors = [
+          "Alex Crichton <alex@alexcrichton.com>"
+          "Josh Triplett <josh@joshtriplett.org>"
+        ];
+        dependencies = [
+          {
+            name = "crc32fast";
+            packageId = "crc32fast";
+            optional = true;
+          }
+          {
+            name = "miniz_oxide";
+            packageId = "miniz_oxide";
+            optional = true;
+            usesDefaultFeatures = false;
+            features = [ "with-alloc" "simd" ];
+          }
+          {
+            name = "miniz_oxide";
+            packageId = "miniz_oxide";
+            usesDefaultFeatures = false;
+            target = { target, features }: (("wasm32" == target."arch" or null) && (!("emscripten" == target."os" or null)));
+            features = [ "with-alloc" "simd" ];
+          }
+        ];
+        features = {
+          "any_c_zlib" = [ "any_zlib" ];
+          "any_zlib" = [ "any_impl" ];
+          "cloudflare-zlib-sys" = [ "dep:cloudflare-zlib-sys" ];
+          "cloudflare_zlib" = [ "any_c_zlib" "cloudflare-zlib-sys" "dep:crc32fast" ];
+          "default" = [ "rust_backend" ];
+          "document-features" = [ "dep:document-features" ];
+          "libz-ng-sys" = [ "dep:libz-ng-sys" ];
+          "libz-sys" = [ "dep:libz-sys" ];
+          "miniz-sys" = [ "rust_backend" ];
+          "miniz_oxide" = [ "any_impl" "dep:miniz_oxide" "dep:crc32fast" ];
+          "rust_backend" = [ "miniz_oxide" "any_impl" ];
+          "zlib" = [ "any_c_zlib" "libz-sys" "dep:crc32fast" ];
+          "zlib-default" = [ "any_c_zlib" "libz-sys/default" "dep:crc32fast" ];
+          "zlib-ng" = [ "any_c_zlib" "libz-ng-sys" "dep:crc32fast" ];
+          "zlib-ng-compat" = [ "zlib" "libz-sys/zlib-ng" "dep:crc32fast" ];
+          "zlib-rs" = [ "any_zlib" "dep:zlib-rs" ];
+        };
+        resolvedDefaultFeatures = [ "any_impl" "default" "miniz_oxide" "rust_backend" ];
       };
       "fnv" = rec {
         crateName = "fnv";
@@ -2504,6 +2643,22 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "std" ];
       };
+      "linux-raw-sys" = rec {
+        crateName = "linux-raw-sys";
+        version = "0.12.1";
+        edition = "2021";
+        sha256 = "0lwasljrqxjjfk9l2j8lyib1babh2qjlnhylqzl01nihw14nk9ij";
+        libName = "linux_raw_sys";
+        authors = [
+          "Dan Gohman <dev@sunfishcode.online>"
+        ];
+        features = {
+          "core" = [ "dep:core" ];
+          "default" = [ "std" "general" "errno" ];
+          "rustc-dep-of-std" = [ "core" "no_std" ];
+        };
+        resolvedDefaultFeatures = [ "auxvec" "elf" "errno" "general" "ioctl" "no_std" ];
+      };
       "litemap" = rec {
         crateName = "litemap";
         version = "0.8.2";
@@ -2660,6 +2815,40 @@ rec {
           "Sean McArthur <sean@seanmonstar.com>"
         ];
 
+      };
+      "miniz_oxide" = rec {
+        crateName = "miniz_oxide";
+        version = "0.8.9";
+        edition = "2021";
+        sha256 = "05k3pdg8bjjzayq3rf0qhpirq9k37pxnasfn4arbs17phqn6m9qz";
+        authors = [
+          "Frommi <daniil.liferenko@gmail.com>"
+          "oyvindln <oyvindln@users.noreply.github.com>"
+          "Rich Geldreich richgel99@gmail.com"
+        ];
+        dependencies = [
+          {
+            name = "adler2";
+            packageId = "adler2";
+            usesDefaultFeatures = false;
+          }
+          {
+            name = "simd-adler32";
+            packageId = "simd-adler32";
+            optional = true;
+            usesDefaultFeatures = false;
+          }
+        ];
+        features = {
+          "alloc" = [ "dep:alloc" ];
+          "core" = [ "dep:core" ];
+          "default" = [ "with-alloc" ];
+          "rustc-dep-of-std" = [ "core" "alloc" "adler2/rustc-dep-of-std" ];
+          "serde" = [ "dep:serde" ];
+          "simd" = [ "simd-adler32" ];
+          "simd-adler32" = [ "dep:simd-adler32" ];
+        };
+        resolvedDefaultFeatures = [ "simd" "simd-adler32" "with-alloc" ];
       };
       "mio" = rec {
         crateName = "mio";
@@ -3175,6 +3364,113 @@ rec {
           }
         ];
 
+      };
+      "rustix" = rec {
+        crateName = "rustix";
+        version = "1.1.4";
+        edition = "2021";
+        sha256 = "14511f9yjqh0ix07xjrjpllah3325774gfwi9zpq72sip5jlbzmn";
+        authors = [
+          "Dan Gohman <dev@sunfishcode.online>"
+          "Jakub Konka <kubkon@jakubkonka.com>"
+        ];
+        dependencies = [
+          {
+            name = "bitflags";
+            packageId = "bitflags";
+            usesDefaultFeatures = false;
+          }
+          {
+            name = "errno";
+            packageId = "errno";
+            rename = "libc_errno";
+            optional = true;
+            usesDefaultFeatures = false;
+            target = { target, features }: ((!(target."rustix_use_libc" or false)) && (!(target."miri" or false)) && ("linux" == target."os" or null) && (("little" == target."endian" or null) || (("s390x" == target."arch" or null) || ("powerpc" == target."arch" or null))) && (("arm" == target."arch" or null) || (("aarch64" == target."arch" or null) && ("64" == target."pointer_width" or null)) || ("riscv64" == target."arch" or null) || ((target."rustix_use_experimental_asm" or false) && ("powerpc" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("powerpc64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("s390x" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips32r6" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64r6" == target."arch" or null)) || ("x86" == target."arch" or null) || (("x86_64" == target."arch" or null) && ("64" == target."pointer_width" or null))));
+          }
+          {
+            name = "errno";
+            packageId = "errno";
+            rename = "libc_errno";
+            usesDefaultFeatures = false;
+            target = { target, features }: ((!(target."windows" or false)) && ((target."rustix_use_libc" or false) || (target."miri" or false) || (!(("linux" == target."os" or null) && (("little" == target."endian" or null) || (("s390x" == target."arch" or null) || ("powerpc" == target."arch" or null))) && (("arm" == target."arch" or null) || (("aarch64" == target."arch" or null) && ("64" == target."pointer_width" or null)) || ("riscv64" == target."arch" or null) || ((target."rustix_use_experimental_asm" or false) && ("powerpc" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("powerpc64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("s390x" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips32r6" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64r6" == target."arch" or null)) || ("x86" == target."arch" or null) || (("x86_64" == target."arch" or null) && ("64" == target."pointer_width" or null)))))));
+          }
+          {
+            name = "errno";
+            packageId = "errno";
+            rename = "libc_errno";
+            usesDefaultFeatures = false;
+            target = { target, features }: (target."windows" or false);
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+            optional = true;
+            usesDefaultFeatures = false;
+            target = { target, features }: ((!(target."rustix_use_libc" or false)) && (!(target."miri" or false)) && ("linux" == target."os" or null) && (("little" == target."endian" or null) || (("s390x" == target."arch" or null) || ("powerpc" == target."arch" or null))) && (("arm" == target."arch" or null) || (("aarch64" == target."arch" or null) && ("64" == target."pointer_width" or null)) || ("riscv64" == target."arch" or null) || ((target."rustix_use_experimental_asm" or false) && ("powerpc" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("powerpc64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("s390x" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips32r6" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64r6" == target."arch" or null)) || ("x86" == target."arch" or null) || (("x86_64" == target."arch" or null) && ("64" == target."pointer_width" or null))));
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+            usesDefaultFeatures = false;
+            target = { target, features }: ((!(target."windows" or false)) && ((target."rustix_use_libc" or false) || (target."miri" or false) || (!(("linux" == target."os" or null) && (("little" == target."endian" or null) || (("s390x" == target."arch" or null) || ("powerpc" == target."arch" or null))) && (("arm" == target."arch" or null) || (("aarch64" == target."arch" or null) && ("64" == target."pointer_width" or null)) || ("riscv64" == target."arch" or null) || ((target."rustix_use_experimental_asm" or false) && ("powerpc" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("powerpc64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("s390x" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips32r6" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64r6" == target."arch" or null)) || ("x86" == target."arch" or null) || (("x86_64" == target."arch" or null) && ("64" == target."pointer_width" or null)))))));
+          }
+          {
+            name = "linux-raw-sys";
+            packageId = "linux-raw-sys";
+            usesDefaultFeatures = false;
+            target = { target, features }: ((("linux" == target."os" or null) || ("android" == target."os" or null)) && ((target."rustix_use_libc" or false) || (target."miri" or false) || (!(("linux" == target."os" or null) && (("little" == target."endian" or null) || (("s390x" == target."arch" or null) || ("powerpc" == target."arch" or null))) && (("arm" == target."arch" or null) || (("aarch64" == target."arch" or null) && ("64" == target."pointer_width" or null)) || ("riscv64" == target."arch" or null) || ((target."rustix_use_experimental_asm" or false) && ("powerpc" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("powerpc64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("s390x" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips32r6" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64r6" == target."arch" or null)) || ("x86" == target."arch" or null) || (("x86_64" == target."arch" or null) && ("64" == target."pointer_width" or null)))))));
+            features = [ "general" "ioctl" "no_std" ];
+          }
+          {
+            name = "linux-raw-sys";
+            packageId = "linux-raw-sys";
+            usesDefaultFeatures = false;
+            target = { target, features }: ((!(target."rustix_use_libc" or false)) && (!(target."miri" or false)) && ("linux" == target."os" or null) && (("little" == target."endian" or null) || (("s390x" == target."arch" or null) || ("powerpc" == target."arch" or null))) && (("arm" == target."arch" or null) || (("aarch64" == target."arch" or null) && ("64" == target."pointer_width" or null)) || ("riscv64" == target."arch" or null) || ((target."rustix_use_experimental_asm" or false) && ("powerpc" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("powerpc64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("s390x" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips32r6" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64" == target."arch" or null)) || ((target."rustix_use_experimental_asm" or false) && ("mips64r6" == target."arch" or null)) || ("x86" == target."arch" or null) || (("x86_64" == target."arch" or null) && ("64" == target."pointer_width" or null))));
+            features = [ "auxvec" "general" "errno" "ioctl" "no_std" "elf" ];
+          }
+          {
+            name = "windows-sys";
+            packageId = "windows-sys";
+            target = { target, features }: (target."windows" or false);
+            features = [ "Win32_Foundation" "Win32_Networking_WinSock" ];
+          }
+        ];
+        devDependencies = [
+          {
+            name = "errno";
+            packageId = "errno";
+            rename = "libc_errno";
+            usesDefaultFeatures = false;
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+          }
+        ];
+        features = {
+          "all-apis" = [ "event" "fs" "io_uring" "mm" "mount" "net" "param" "pipe" "process" "pty" "rand" "runtime" "shm" "stdio" "system" "termios" "thread" "time" ];
+          "core" = [ "dep:core" ];
+          "default" = [ "std" ];
+          "io_uring" = [ "event" "fs" "net" "thread" "linux-raw-sys/io_uring" ];
+          "libc" = [ "dep:libc" ];
+          "libc_errno" = [ "dep:libc_errno" ];
+          "linux_5_1" = [ "linux_4_11" ];
+          "linux_5_11" = [ "linux_5_1" ];
+          "linux_latest" = [ "linux_5_11" ];
+          "net" = [ "linux-raw-sys/net" "linux-raw-sys/netlink" "linux-raw-sys/if_ether" "linux-raw-sys/xdp" ];
+          "process" = [ "linux-raw-sys/prctl" ];
+          "pty" = [ "fs" ];
+          "runtime" = [ "linux-raw-sys/prctl" ];
+          "rustc-dep-of-std" = [ "core" "rustc-std-workspace-alloc" "linux-raw-sys/rustc-dep-of-std" "bitflags/rustc-dep-of-std" ];
+          "rustc-std-workspace-alloc" = [ "dep:rustc-std-workspace-alloc" ];
+          "shm" = [ "fs" ];
+          "std" = [ "bitflags/std" "alloc" "libc?/std" "libc_errno?/std" ];
+          "system" = [ "linux-raw-sys/system" ];
+          "thread" = [ "linux-raw-sys/prctl" ];
+          "use-libc" = [ "libc_errno" "libc" ];
+        };
+        resolvedDefaultFeatures = [ "alloc" "fs" "std" ];
       };
       "rustversion" = rec {
         crateName = "rustversion";
@@ -3892,6 +4188,19 @@ rec {
         ];
 
       };
+      "simd-adler32" = rec {
+        crateName = "simd-adler32";
+        version = "0.3.9";
+        edition = "2018";
+        sha256 = "0532ysdwcvzyp2bwpk8qz0hijplcdwpssr5gy5r7qwqqy5z5qgbh";
+        libName = "simd_adler32";
+        authors = [
+          "Marvin Countryman <me@maar.vin>"
+        ];
+        features = {
+          "default" = [ "std" "const-generics" ];
+        };
+      };
       "simdutf8" = rec {
         crateName = "simdutf8";
         version = "0.1.5";
@@ -4116,6 +4425,37 @@ rec {
           "proc-macro" = [ "proc-macro2/proc-macro" "syn/proc-macro" "quote/proc-macro" ];
         };
         resolvedDefaultFeatures = [ "default" "proc-macro" ];
+      };
+      "tar" = rec {
+        crateName = "tar";
+        version = "0.4.46";
+        edition = "2021";
+        sha256 = "0h68bc0y1nma3h2ypj28vxc84msjydlrj8rviqwphg00lvcj2qiz";
+        authors = [
+          "Alex Crichton <alex@alexcrichton.com>"
+        ];
+        dependencies = [
+          {
+            name = "filetime";
+            packageId = "filetime";
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+            target = { target, features }: (target."unix" or false);
+          }
+          {
+            name = "xattr";
+            packageId = "xattr";
+            optional = true;
+            target = { target, features }: (target."unix" or false);
+          }
+        ];
+        features = {
+          "default" = [ "xattr" ];
+          "xattr" = [ "dep:xattr" ];
+        };
+        resolvedDefaultFeatures = [ "default" "xattr" ];
       };
       "thiserror" = rec {
         crateName = "thiserror";
@@ -4967,6 +5307,49 @@ rec {
         ];
 
       };
+      "ureq" = rec {
+        crateName = "ureq";
+        version = "2.12.1";
+        edition = "2018";
+        sha256 = "07f0qdn6459k4rmdnkivkz0y7j28vxh5c8q8sr0gcxgdfxiadl82";
+        authors = [
+          "Martin Algesten <martin@algesten.se>"
+          "Jacob Hoffman-Andrews <ureq@hoffman-andrews.com>"
+        ];
+        dependencies = [
+          {
+            name = "base64";
+            packageId = "base64";
+          }
+          {
+            name = "log";
+            packageId = "log";
+          }
+          {
+            name = "once_cell";
+            packageId = "once_cell";
+          }
+          {
+            name = "url";
+            packageId = "url";
+          }
+        ];
+        features = {
+          "brotli" = [ "dep:brotli-decompressor" ];
+          "charset" = [ "dep:encoding_rs" ];
+          "cookies" = [ "dep:cookie" "dep:cookie_store" ];
+          "default" = [ "tls" "gzip" ];
+          "gzip" = [ "dep:flate2" ];
+          "http-crate" = [ "dep:http" ];
+          "http-interop" = [ "dep:http-02" ];
+          "json" = [ "dep:serde" "dep:serde_json" ];
+          "native-certs" = [ "dep:rustls-native-certs" ];
+          "native-tls" = [ "dep:native-tls" ];
+          "socks-proxy" = [ "dep:socks" ];
+          "testdeps" = [ "dep:hootbin" ];
+          "tls" = [ "dep:webpki-roots" "dep:rustls" "dep:rustls-pki-types" ];
+        };
+      };
       "url" = rec {
         crateName = "url";
         version = "2.5.8";
@@ -5691,6 +6074,33 @@ rec {
           "default" = [ "alloc" ];
           "either" = [ "dep:either" ];
         };
+      };
+      "xattr" = rec {
+        crateName = "xattr";
+        version = "1.6.1";
+        edition = "2021";
+        sha256 = "0ml1mb43gqasawillql6b344m0zgq8mz0isi11wj8vbg43a5mr1j";
+        authors = [
+          "Steven Allen <steven@stebalien.com>"
+        ];
+        dependencies = [
+          {
+            name = "libc";
+            packageId = "libc";
+            target = { target, features }: (("freebsd" == target."os" or null) || ("netbsd" == target."os" or null));
+          }
+          {
+            name = "rustix";
+            packageId = "rustix";
+            usesDefaultFeatures = false;
+            target = { target, features }: (("android" == target."os" or null) || ("linux" == target."os" or null) || ("macos" == target."os" or null) || ("hurd" == target."os" or null));
+            features = [ "fs" "std" ];
+          }
+        ];
+        features = {
+          "default" = [ "unsupported" ];
+        };
+        resolvedDefaultFeatures = [ "default" "unsupported" ];
       };
       "yoke" = rec {
         crateName = "yoke";

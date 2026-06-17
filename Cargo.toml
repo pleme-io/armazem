@@ -16,6 +16,14 @@ exclude = ["target/", "result-*", "Cargo.nix", "flake.*"]
 name = "armazem"
 path = "src/main.rs"
 
+# The publish-step tool of the `git→forge→armazem(S3)→hanabi→browser` demo:
+# tars+gzips a local directory and uploads it to the S3 gateway, anonymously
+# over plain HTTP (armazem M0 has no SigV4 auth). Self-contained, light HTTP
+# client (ureq) so it adds no async/TLS/tokio weight to the publish image.
+[[bin]]
+name = "armazem-publish"
+path = "src/bin/armazem-publish.rs"
+
 [dependencies]
 # S3 gateway core. The s3s crate implements the S3 wire protocol over a typed
 # `S3` trait; s3s-fs is the official filesystem-backed `S3` impl (the M0
@@ -41,6 +49,15 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Error handling (application glue).
 anyhow = "1.0"
+
+# `armazem-publish` only. Tar + gzip the local directory into an in-memory
+# `.tar.gz` buffer, then PUT it to the S3 gateway with a light blocking HTTP
+# client (no async, no TLS — plain anonymous HTTP).
+tar = "0.4"
+flate2 = "1"
+# Plain anonymous HTTP only — disable default features so no TLS stack (rustls /
+# ring) is dragged in. The endpoint is `http://…`, never `https://`.
+ureq = { version = "2", default-features = false }
 
 [profile.release]
 opt-level = "z"
